@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>IoT Dashboard - Level Up</title>
+    <!-- Import Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #0a192f;
+        color: #e6f1ff;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .card {
+        background: #112240;
+        padding: 20px;
+        border-radius: 15px;
+        width: 200px;
+      }
+      .title {
+        font-size: 14px;
+        color: #8892b0;
+        text-transform: uppercase;
+      }
+      .value {
+        font-size: 40px;
+        font-weight: bold;
+        color: #64ffda;
+        margin: 10px 0;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background: #64ffda;
+        border: none;
+        border-radius: 5px;
+        margin: 5px;
+        color: #0a192f;
+        font-weight: bold;
+      }
+      .chart-container {
+        width: 80%;
+        margin: 0 auto;
+        background: #112240;
+        padding: 20px;
+        border-radius: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Smart Room Monitoring (Pro)</h1>
+
+    <div
+      id="peringatan"
+      style="
+        color: #ff6b6b;
+        font-weight: bold;
+        font-size: 24px;
+        margin-bottom: 20px;
+        display: none;
+      "
+    >
+      ⚠️ SUHU TINGGI TERDETEKSI!
+    </div>
+
+    <div class="container">
+      <div class="card">
+        <div class="title">Suhu Ruangan</div>
+        <div class="value" id="suhu">--</div>
+      </div>
+      <div class="card">
+        <div class="title">Kelembaban</div>
+        <div class="value" id="kelembaban">--</div>
+      </div>
+      <div class="card">
+        <div class="title">Kontrol Lampu (Auth)</div>
+        <button onclick="kontrolLampu('ON')">Nyalakan</button>
+        <button onclick="kontrolLampu('OFF')">Matikan</button>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="grafikSuhu"></canvas>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:1880/api/sensor";
+      const API_KONTROL = "http://localhost:1880/api/kontrol";
+      const API_KEY = "rahasia123"; // Ini API Key kita
+
+      // --- SETUP CHART.JS ---
+      const ctx = document.getElementById("grafikSuhu").getContext("2d");
+      const myChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Suhu (°C)",
+              data: [],
+              borderColor: "#FF6B6B",
+              backgroundColor: "rgba(255, 107, 107, 0.2)",
+              borderWidth: 3,
+              fill: true,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: { responsive: true, animation: false },
+      });
+
+      // --- FUNGSI UPDATE DATA ---
+      function updateDashboard() {
+        fetch(API_URL)
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("suhu").innerText =
+              data.suhu.toFixed(1) + "°C";
+            document.getElementById("kelembaban").innerText =
+              data.kelembaban.toFixed(0) + "%";
+
+            // Masukkan ke Grafik
+            const waktu = new Date().toLocaleTimeString();
+            myChart.data.labels.push(waktu);
+            myChart.data.datasets[0].data.push(data.suhu);
+
+            // Batasi max 15 data
+            if (myChart.data.labels.length > 15) {
+              myChart.data.labels.shift();
+              myChart.data.datasets[0].data.shift();
+            }
+            myChart.update();
+          })
+          .catch((err) => console.error("Gagal:", err));
+      }
+
+      // --- FUNGSI KONTROL (DENGAN API KEY) ---
+      function kontrolLampu(status) {
+        fetch(API_KONTROL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": API_KEY, // <-- Header Rahasia
+          },
+          body: JSON.stringify({ perintah: status }),
+        })
+          .then((res) => res.text())
+          .then((data) => alert("Respon Server: " + data))
+          .catch((err) => console.error("Gagal:", err));
+      }
+
+      // --- IMPLEMENTASI WEBSOCKET ---
+      const ws = new WebSocket("ws://localhost:1880/ws/sensor");
+
+      ws.onopen = function () {
+        console.log("Terhubung ke Node-RED WebSocket!");
+      };
+
+      ws.onmessage = function (event) {
+        // Data diterima secara real-time
+        const data = JSON.parse(event.data);
+
+        // Update teks
+        document.getElementById("suhu").innerText = data.suhu.toFixed(1) + "°C";
+        document.getElementById("kelembaban").innerText =
+          data.kelembaban.toFixed(0) + "%";
+
+        // Update Chart.js
+        const waktu = new Date().toLocaleTimeString();
+        myChart.data.labels.push(waktu);
+        myChart.data.datasets[0].data.push(data.suhu);
+
+        if (myChart.data.labels.length > 15) {
+          myChart.data.labels.shift();
+          myChart.data.datasets[0].data.shift();
+        }
+        myChart.update();
+      };
+
+      ws.onerror = function (err) {
+        console.error("WebSocket Error: ", err);
+      };
+    </script>
+  </body>
+</html>

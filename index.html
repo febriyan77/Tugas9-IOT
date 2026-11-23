@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Home Dashboard</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #0a192f;
+        color: #e6f1ff;
+        text-align: center;
+        margin: 0;
+        padding: 40px;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+      .card {
+        background: #112240;
+        padding: 30px;
+        border-radius: 15px;
+        width: 250px;
+        box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7);
+      }
+      .title {
+        font-size: 18px;
+        color: #8892b0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .value {
+        font-size: 56px;
+        font-weight: bold;
+        color: #64ffda;
+        margin: 10px 0;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background: #64ffda;
+        border: none;
+        border-radius: 5px;
+        margin-top: 15px;
+        color: #0a192f;
+        font-weight: bold;
+      }
+      button:hover {
+        background: #52e0be;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Smart Room Monitoring</h1>
+
+    <div class="container">
+      <div class="card">
+        <div class="title">Suhu Ruangan</div>
+        <div class="value" id="suhu">--</div>
+      </div>
+      <div class="card">
+        <div class="title">Kelembaban</div>
+        <div class="value" id="kelembaban">--</div>
+      </div>
+      <div class="card">
+        <div class="title">Kontrol Lampu</div>
+        <button onclick="kontrolLampu('ON')">Nyalakan</button>
+        <button onclick="kontrolLampu('OFF')">Matikan</button>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:1880/api/sensor";
+      const API_KONTROL = "http://localhost:1880/api/kontrol";
+
+      function updateDashboard() {
+        fetch(API_URL)
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("suhu").innerText =
+              data.suhu.toFixed(1) + "°C";
+            document.getElementById("kelembaban").innerText =
+              data.kelembaban.toFixed(0) + "%";
+          })
+          .catch((err) => console.error("Gagal ambil data:", err));
+      }
+
+      function kontrolLampu(status) {
+        fetch(API_KONTROL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": "rahasia123", // <-- TAMBAHKAN BARIS INI
+          },
+          body: JSON.stringify({ perintah: status }),
+        })
+          .then((res) => res.text())
+          .then((data) => alert("Perintah terkirim: " + data))
+          .catch((err) => console.error(err));
+      }
+
+      updateDashboard();
+      setInterval(updateDashboard, 2000);
+    </script>
+  </body>
+</html>

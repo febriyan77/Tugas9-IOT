@@ -1,0 +1,535 @@
+[
+    {
+        "id": "5793a99c2c8efcd9",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b1ba6473b3868fe0",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8a56c357d8674665",
+        "type": "tab",
+        "label": "Flow 4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "780f52e457b08e87",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4ee931fdffee95bb",
+        "type": "tab",
+        "label": "Flow 5",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "0c2454180094713b",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost:1883",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "98601a0d6f0c0c3a",
+        "type": "websocket-listener",
+        "path": "/ws/sensor",
+        "wholemsg": "false"
+    },
+    {
+        "id": "132faab999139884",
+        "type": "sqlitedb",
+        "db": "C:\\Users\\User\\.node-red\\history.db",
+        "mode": "RWC"
+    },
+    {
+        "id": "7dd85e1cf687687e",
+        "type": "mqtt in",
+        "z": "5793a99c2c8efcd9",
+        "name": "",
+        "topic": "kelas/iot/suhu",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "0c2454180094713b",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 430,
+        "y": 400,
+        "wires": [
+            [
+                "fa8ad1e2fdebd5d4"
+            ]
+        ]
+    },
+    {
+        "id": "fa8ad1e2fdebd5d4",
+        "type": "function",
+        "z": "5793a99c2c8efcd9",
+        "name": "simpan",
+        "func": "global.set(\"suhu_terakhir\", msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9d20e54f17921184",
+        "type": "http in",
+        "z": "b1ba6473b3868fe0",
+        "name": "",
+        "url": "/api/sensor",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 380,
+        "y": 320,
+        "wires": [
+            [
+                "919d15e79c79d16e"
+            ]
+        ]
+    },
+    {
+        "id": "919d15e79c79d16e",
+        "type": "function",
+        "z": "b1ba6473b3868fe0",
+        "name": "ambil",
+        "func": "// Kita buat data dummy dulu untuk testing\nvar suhu = global.get(\"suhu_terakhir\") || 28.5;\nvar kelembaban = global.get(\"kelembaban_terakhir\") || 65;\n\nmsg.payload = {\n    suhu: Number(suhu),\n    kelembaban: Number(kelembaban)\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 320,
+        "wires": [
+            [
+                "1d42b26698883588"
+            ]
+        ]
+    },
+    {
+        "id": "313631409d731e1d",
+        "type": "http response",
+        "z": "b1ba6473b3868fe0",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 950,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "1d42b26698883588",
+        "type": "change",
+        "z": "b1ba6473b3868fe0",
+        "name": "change",
+        "rules": [
+            {
+                "t": "set",
+                "p": "headers",
+                "pt": "msg",
+                "to": "{\"Access-Control-Allow-Origin\": \"*\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 320,
+        "wires": [
+            [
+                "313631409d731e1d"
+            ]
+        ]
+    },
+    {
+        "id": "148d8785a5797b51",
+        "type": "http in",
+        "z": "8a56c357d8674665",
+        "name": "",
+        "url": "/api/kontrol",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 340,
+        "y": 420,
+        "wires": [
+            [
+                "15bfa86ec4d3826c"
+            ]
+        ]
+    },
+    {
+        "id": "1441461d62e073dd",
+        "type": "function",
+        "z": "8a56c357d8674665",
+        "name": "ambil perintah",
+        "func": "msg.payload = msg.payload.perintah;  // \"ON\" atau \"OFF\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 420,
+        "wires": [
+            [
+                "103fb0ec5a884ee9",
+                "23fef6fb4e262516"
+            ]
+        ]
+    },
+    {
+        "id": "103fb0ec5a884ee9",
+        "type": "mqtt out",
+        "z": "8a56c357d8674665",
+        "name": "",
+        "topic": "kelas/iot/lampu/control",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "0c2454180094713b",
+        "x": 1000,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "882f4c02afd217f7",
+        "type": "http response",
+        "z": "8a56c357d8674665",
+        "name": "balas sukses",
+        "statusCode": "",
+        "headers": {},
+        "x": 1190,
+        "y": 500,
+        "wires": [],
+        "info": "msg.payload = \"Perintah diterima\";\r\nmsg.statusCode = 200;\r\nreturn msg;"
+    },
+    {
+        "id": "23fef6fb4e262516",
+        "type": "change",
+        "z": "8a56c357d8674665",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "\"perintah diterima\"",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 980,
+        "y": 540,
+        "wires": [
+            [
+                "882f4c02afd217f7"
+            ]
+        ]
+    },
+    {
+        "id": "15bfa86ec4d3826c",
+        "type": "function",
+        "z": "8a56c357d8674665",
+        "name": "cek api key",
+        "func": "const API_KEY_VALID = \"rahasia123\"; // Kunci kita\n\n// Cek header x-api-key\nif (msg.req.headers['x-api-key'] !== API_KEY_VALID) {\n    msg.payload = \"Akses Ditolak: API Key Salah!\";\n    msg.statusCode = 401; // Unauthorized\n    return [null, msg];   // Hentikan (kirim ke output 2)\n}\n\nreturn [msg, null];       // Lolos (kirim ke output 1)",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 420,
+        "wires": [
+            [
+                "1441461d62e073dd"
+            ],
+            [
+                "882f4c02afd217f7"
+            ]
+        ]
+    },
+    {
+        "id": "302985fa6060825c",
+        "type": "http in",
+        "z": "780f52e457b08e87",
+        "name": "",
+        "url": "/api/thresold",
+        "method": "put",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 340,
+        "y": 240,
+        "wires": [
+            [
+                "583cc0adc670cd53"
+            ]
+        ]
+    },
+    {
+        "id": "583cc0adc670cd53",
+        "type": "function",
+        "z": "780f52e457b08e87",
+        "name": "simpan thresold",
+        "func": "// Simpan batas suhu dari web ke global context\nglobal.set(\"batas_suhu\", Number(msg.payload.batas));\nmsg.payload = { status: \"success\", batas_baru: global.get(\"batas_suhu\") };\nmsg.headers = { \"Access-Control-Allow-Origin\": \"*\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 240,
+        "wires": [
+            [
+                "4f4e21a8133358aa"
+            ]
+        ]
+    },
+    {
+        "id": "4f4e21a8133358aa",
+        "type": "http response",
+        "z": "780f52e457b08e87",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 830,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "392b2bf36eabcad7",
+        "type": "websocket in",
+        "z": "4ee931fdffee95bb",
+        "name": "ws masuk",
+        "server": "98601a0d6f0c0c3a",
+        "client": "",
+        "x": 460,
+        "y": 260,
+        "wires": [
+            [
+                "67e93365576cb0fa"
+            ]
+        ]
+    },
+    {
+        "id": "c1703d6b56ddb75f",
+        "type": "websocket out",
+        "z": "4ee931fdffee95bb",
+        "name": "ws keluar",
+        "server": "98601a0d6f0c0c3a",
+        "client": "",
+        "x": 1560,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "64cf5a1b8f7f5b42",
+        "type": "inject",
+        "z": "4ee931fdffee95bb",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"suhu\": 28.5, \"kelembaban\": 65}",
+        "payloadType": "json",
+        "x": 670,
+        "y": 260,
+        "wires": [
+            [
+                "67e93365576cb0fa"
+            ]
+        ]
+    },
+    {
+        "id": "67e93365576cb0fa",
+        "type": "function",
+        "z": "4ee931fdffee95bb",
+        "name": "acak suhu",
+        "func": "// Simulasi suhu naik-turun (antara 26.0 s/d 32.0)\nvar suhuRandom = (Math.random() * (32.0 - 26.0) + 26.0).toFixed(1);\n\n// Karena msg.payload sudah berupa Object (dari Inject), kita tinggal ubah nilainya\nmsg.payload.suhu = Number(suhuRandom);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 260,
+        "wires": [
+            [
+                "b0bdd6e44f512a0f"
+            ]
+        ]
+    },
+    {
+        "id": "93376cbb0c227c83",
+        "type": "switch",
+        "z": "4ee931fdffee95bb",
+        "name": "",
+        "property": "payload.suhu",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "30",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1230,
+        "y": 260,
+        "wires": [
+            [
+                "ae96c08219a5b5bb"
+            ],
+            [
+                "c1703d6b56ddb75f"
+            ]
+        ]
+    },
+    {
+        "id": "ae96c08219a5b5bb",
+        "type": "function",
+        "z": "4ee931fdffee95bb",
+        "name": "format alarm",
+        "func": "msg.payload = {\n    status: \"BAHAYA\",\n    pesan: \"Suhu melewati batas 30°C!\",\n    suhu_saat_ini: msg.payload.suhu\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1390,
+        "y": 240,
+        "wires": [
+            [
+                "c1703d6b56ddb75f"
+            ]
+        ]
+    },
+    {
+        "id": "f4c74d51b2b40f25",
+        "type": "sqlite",
+        "z": "4ee931fdffee95bb",
+        "mydb": "132faab999139884",
+        "sqlquery": "fixed",
+        "sql": "CREATE TABLE IF NOT EXISTS log_sensor (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    waktu DATETIME DEFAULT CURRENT_TIMESTAMP,\n    suhu REAL,\n    kelembaban REAL\n);",
+        "name": "",
+        "x": 1360,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b0bdd6e44f512a0f",
+        "type": "function",
+        "z": "4ee931fdffee95bb",
+        "name": "format DB",
+        "func": "// Kita ambil data asli\nvar suhuVal = msg.payload.suhu;\nvar kelembabanVal = msg.payload.kelembaban;\n\n// 1. Buat pesan untuk SQLITE\nvar msgDB = {\n    topic: \"INSERT INTO log_sensor (suhu, kelembaban) VALUES (?, ?)\",\n    payload: [suhuVal, kelembabanVal]\n};\n\n// 2. Buat pesan untuk WEB\nvar msgWeb = {\n    payload: {\n        suhu: suhuVal,\n        kelembaban: kelembabanVal\n    }\n};\n\nreturn [msgDB, msgWeb];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1080,
+        "y": 260,
+        "wires": [
+            [
+                "f4c74d51b2b40f25"
+            ],
+            [
+                "93376cbb0c227c83"
+            ]
+        ]
+    },
+    {
+        "id": "83e63af4b355cc4f",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-sqlite": "2.0.1"
+        }
+    }
+]
